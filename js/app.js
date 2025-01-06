@@ -1,9 +1,6 @@
-// js/app.js
-
 document.addEventListener('DOMContentLoaded', () => {
     new Vue({
         el: '#app',
-        delimiters: ['{{', '}}'],
         data: {
             isAuthenticated: false,
             username: '',
@@ -11,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tabs: [
                 { id: 'booking', name: 'Book Transport' },
                 { id: 'membership', name: 'Membership' },
-                { id: 'feedback', name: 'Feedback' },
+                { id: 'feedback', name: 'Feedback' }
             ],
             showBookingConfirmation: false,
             showFeedbackConfirmation: false,
@@ -43,79 +40,64 @@ document.addEventListener('DOMContentLoaded', () => {
                     type: 'basic',
                     name: 'Basic Plan',
                     description: 'Essential features for occasional users.',
-                    price: 49,
-                    period: 'month',
+                    price: 99,
                     benefits: [
                         'Up to 2 transports per month',
-                        'Standard support',
-                        'Access to basic features'
+                        '24/7 customer support',
+                        'Access to local routes'
                     ]
                 },
                 {
                     type: 'premium',
                     name: 'Premium Plan',
                     description: 'Advanced features for frequent users.',
-                    price: 99,
-                    period: 'month',
+                    price: 249,
                     benefits: [
                         'Up to 5 transports per month',
-                        'Priority support',
-                        'Access to premium features'
+                        'Priority booking',
+                        'Extended routes (up to 100 miles)'
                     ]
                 },
                 {
                     type: 'unlimited',
                     name: 'Unlimited Plan',
                     description: 'Unlimited features for power users.',
-                    price: 199,
-                    period: 'month',
+                    price: 499,
                     benefits: [
                         'Unlimited transports',
-                        '24/7 support',
-                        'Access to all features'
+                        'Nationwide routes',
+                        'Premium 24/7 support'
                     ]
                 }
             ],
             selectedPlan: null,
-            membershipForm: {
-                fullName: '',
-                email: '',
-                phone: ''
-            },
             userBookings: [] // Mock data for user bookings
         },
         computed: {
             isBookingFormValid() {
                 return this.bookingForm.contact_name &&
-                       this.bookingForm.email &&
-                       this.bookingForm.phone &&
-                       this.bookingForm.date &&
-                       this.bookingForm.time &&
-                       this.bookingForm.pickup_location &&
-                       this.bookingForm.dropoff_location &&
-                       this.bookingForm.horse_details;
+                    this.bookingForm.email &&
+                    this.bookingForm.phone &&
+                    this.bookingForm.date &&
+                    this.bookingForm.time &&
+                    this.bookingForm.pickup_location &&
+                    this.bookingForm.dropoff_location &&
+                    this.bookingForm.horse_details;
             },
             isFeedbackFormValid() {
                 return this.feedbackForm.title &&
-                       this.feedbackForm.rating > 0 &&
-                       this.feedbackForm.content;
+                    this.feedbackForm.rating > 0 &&
+                    this.feedbackForm.content;
             },
             selectedPlanDetails() {
                 return this.membershipPlans.find(plan => plan.type === this.selectedPlan) || {};
-            },
-            isMembershipFormValid() {
-                return this.membershipForm.fullName &&
-                       this.membershipForm.email &&
-                       this.membershipForm.phone;
             }
         },
         methods: {
             login() {
                 // Simulate a login process
-                // In a real app, you would have a login form and authentication
                 this.isAuthenticated = true;
                 this.username = 'JohnDoe';
-                // Load mock bookings
                 this.userBookings = [
                     {
                         id: 1,
@@ -147,10 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             async fetchAvailableSlots() {
                 if (!this.bookingForm.date) return;
                 try {
-                    // Simulate an API call with mock data
-                    // Replace this with actual API calls if available
                     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-                    // Mock available slots
                     this.availableSlots = [
                         '08:00 AM',
                         '10:00 AM',
@@ -164,9 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             async submitBooking() {
                 try {
-                    // Simulate an API call to submit booking
                     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-                    // Simulate successful response
                     const response = {
                         data: {
                             status: 'success',
@@ -176,7 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (response.data.status === 'success') {
                         this.bookingConfirmation.id = response.data.booking_id;
                         this.showBookingConfirmation = true;
-                        // Reset form
                         this.bookingForm = {
                             contact_name: '',
                             email: '',
@@ -188,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             horse_details: '',
                             special_requirements: ''
                         };
-                        // Optionally, add the booking to userBookings if authenticated
                         if (this.isAuthenticated) {
                             this.userBookings.push({
                                 id: response.data.booking_id,
@@ -204,21 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             closeBookingConfirmation() {
                 this.showBookingConfirmation = false;
-                // Optionally, navigate or reset state
             },
             async submitFeedback() {
                 try {
-                    // Simulate an API call to submit feedback
                     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-                    // Simulate successful response
-                    const response = {
-                        data: {
-                            status: 'success'
-                        }
-                    };
+                    const response = { data: { status: 'success' } };
                     if (response.data.status === 'success') {
                         this.showFeedbackConfirmation = true;
-                        // Reset form
                         this.feedbackForm = {
                             title: '',
                             rating: 0,
@@ -235,18 +202,11 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             async processMembership() {
                 try {
-                    // Simulate an API call to process membership
                     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-                    // Simulate successful response
-                    const response = {
-                        data: {
-                            status: 'success'
-                        }
-                    };
+                    const response = { data: { status: 'success' } };
                     if (response.data.status === 'success') {
                         this.showMembershipModal = false;
                         alert('Your membership has been successfully activated! Check your email for confirmation.');
-                        // Optionally, update user data or state
                     }
                 } catch (error) {
                     alert('Error processing membership. Please try again.');
@@ -256,9 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         watch: {
             'bookingForm.date': 'fetchAvailableSlots'
-        },
-        mounted() {
-            // Optionally, fetch initial data
         }
     });
 });
