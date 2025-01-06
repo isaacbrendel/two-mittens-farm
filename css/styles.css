@@ -1,0 +1,26 @@
+/* css/styles.css */
+
+/* Hide elements until Vue is ready */
+[v-cloak] { 
+    display: none; 
+}
+
+/* Transition effects for tabs */
+.tab-enter-active, .tab-leave-active {
+    transition: opacity 0.3s, transform 0.3s;
+}
+.tab-enter, .tab-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+/* Modal overlay styling */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease;
+}
+
+/* Modal content transition */
+.modal-content {
+    transition: transform 0.3s ease;
+}
