@@ -1,41 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Booking Component
+    // Components
     const BookingComponent = {
         template: `
-            <div class="space-y-8 animate-fadeIn">
+            <div class="space-y-8">
                 <div class="card-luxury">
                     <h2 class="text-3xl font-playfair font-bold mb-8">Premium Transport Booking</h2>
                     <form @submit.prevent="submitBooking" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-charcoal mb-2">Contact Name</label>
-                                <input type="text" v-model="formData.contactName" required 
+                                <input v-model="formData.contactName" type="text" required 
                                     class="input-luxury" placeholder="Your full name" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-charcoal mb-2">Email</label>
-                                <input type="email" v-model="formData.email" required 
+                                <input v-model="formData.email" type="email" required 
                                     class="input-luxury" placeholder="your@email.com" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-charcoal mb-2">Pickup Location</label>
-                                <input type="text" v-model="formData.pickup" required 
+                                <input v-model="formData.pickup" type="text" required 
                                     class="input-luxury" placeholder="Enter pickup address" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-charcoal mb-2">Dropoff Location</label>
-                                <input type="text" v-model="formData.dropoff" required 
+                                <input v-model="formData.dropoff" type="text" required 
                                     class="input-luxury" placeholder="Enter dropoff address" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-charcoal mb-2">Transport Date</label>
-                                <input type="date" v-model="formData.date" required 
-                                    class="input-luxury" />
+                                <input v-model="formData.date" type="date" required class="input-luxury" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-charcoal mb-2">Special Requirements</label>
-                                <textarea v-model="formData.requirements" 
-                                    class="input-luxury" rows="3" 
+                                <textarea v-model="formData.requirements" class="input-luxury" rows="3" 
                                     placeholder="Any specific requirements for your horse"></textarea>
                             </div>
                         </div>
@@ -58,11 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     date: '',
                     requirements: ''
                 }
-            }
+            };
         },
         methods: {
             submitBooking() {
-                // Handle booking submission
                 console.log('Booking submitted:', this.formData);
                 alert('Thank you for your booking request. We will contact you shortly.');
                 this.resetForm();
@@ -80,10 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Membership Component
     const MembershipComponent = {
         template: `
-            <div class="space-y-12 animate-fadeIn">
+            <div class="space-y-12">
                 <div class="text-center mb-12">
                     <h2 class="text-4xl font-playfair font-bold mb-4">Exclusive Membership Plans</h2>
                     <p class="text-gray-600 max-w-2xl mx-auto">
@@ -91,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div v-for="(plan, index) in membershipPlans" 
+                    <div v-for="plan in membershipPlans" 
                          :key="plan.type" 
                          class="card-luxury pricing-card"
                          :class="{ 'featured': plan.type === 'elite' }">
@@ -161,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ]
                     }
                 ]
-            }
+            };
         },
         methods: {
             selectPlan(type) {
@@ -171,10 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Feedback Component
     const FeedbackComponent = {
         template: `
-            <div class="space-y-8 animate-fadeIn">
+            <div class="space-y-8">
                 <div class="card-luxury">
                     <h2 class="text-3xl font-playfair font-bold mb-8">Client Testimonials</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -189,36 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p class="text-gray-700 italic">"{{ review.comment }}"</p>
                             <p class="text-gray-600 font-medium">- {{ review.author }}</p>
                         </div>
-                    </div>
-                    <div class="mt-12 pt-8 border-t border-gray-200">
-                        <h3 class="text-2xl font-playfair font-bold mb-6">Share Your Experience</h3>
-                        <form @submit.prevent="submitFeedback" class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-charcoal mb-2">Name</label>
-                                    <input type="text" v-model="feedbackForm.author" required 
-                                        class="input-luxury" placeholder="Your name" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-charcoal mb-2">Rating</label>
-                                    <select v-model="feedbackForm.rating" required class="input-luxury">
-                                        <option value="">Select rating</option>
-                                        <option v-for="n in 5" :key="n" :value="n">{{ n }} Stars</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-charcoal mb-2">Your Experience</label>
-                                <textarea v-model="feedbackForm.comment" required 
-                                    class="input-luxury w-full" rows="4" 
-                                    placeholder="Share your experience with our services"></textarea>
-                            </div>
-                            <div class="flex justify-end">
-                                <button type="submit" class="btn-luxury px-8 py-3">
-                                    Submit Feedback
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -244,27 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         comment: "Their platinum service exceeded all expectations. Worth every penny.",
                         author: "Elizabeth Chen"
                     }
-                ],
-                feedbackForm: {
-                    author: '',
-                    rating: '',
-                    comment: ''
-                }
-            }
-        },
-        methods: {
-            submitFeedback() {
-                console.log('Feedback submitted:', this.feedbackForm);
-                alert('Thank you for your feedback!');
-                this.resetFeedbackForm();
-            },
-            resetFeedbackForm() {
-                this.feedbackForm = {
-                    author: '',
-                    rating: '',
-                    comment: ''
-                };
-            }
+                ]
+            };
         }
     };
 
@@ -286,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         el: '#app',
         router,
         data: {
+            loading: true,
             isAuthenticated: false,
             username: '',
             tabs: [
@@ -293,6 +240,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'membership', name: 'Membership' },
                 { id: 'feedback', name: 'Testimonials' }
             ]
+        },
+        mounted() {
+            this.loading = false;
         },
         methods: {
             login() {
@@ -305,4 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // Global error handler
+    Vue.config.errorHandler = function(err, vm, info) {
+        console.error('Vue Error:', err);
+        console.log('Error Info:', info);
+    };
 });
