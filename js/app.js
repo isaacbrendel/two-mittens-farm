@@ -1,157 +1,264 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Booking Component
-    const BookingComponent = {
-        template: `
-            <div class="space-y-8">
-                <div class="bg-white shadow-md rounded-lg p-8">
-                    <h2 class="text-2xl font-semibold mb-6">Book a Horse Transport</h2>
-                    <form @submit.prevent="$emit('submit-booking')">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Contact Name</label>
-                                <input type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Email</label>
-                                <input type="email" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                            </div>
-                            <!-- Add other fields similarly -->
-                        </div>
-                        <div class="mt-6 flex justify-end">
-                            <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700">
-                                Submit Booking
-                            </button>
-                        </div>
-                    </form>
-                </div>
+import React, { useState } from 'react';
+import { Calendar, MapPin, Crown, Truck, Shield, Star } from 'lucide-react';
+
+const Navigation = ({ isAuthenticated, username, onLogin, onLogout }) => (
+  <nav className="nav-luxury py-4 sticky top-0 z-50 shadow-md">
+    <div className="container mx-auto px-6 flex justify-between items-center">
+      <div className="flex items-center space-x-4">
+        <div className="relative">
+          <Truck className="text-gold h-10 w-10" />
+          <Crown className="absolute -top-2 -right-2 text-gold h-4 w-4" />
+        </div>
+        <h1 className="text-3xl font-playfair font-bold">Two Mittens Farm</h1>
+      </div>
+      <div className="flex items-center space-x-6">
+        {isAuthenticated ? (
+          <>
+            <span className="font-inter text-charcoal">Welcome, {username}</span>
+            <button 
+              onClick={onLogout}
+              className="btn-luxury px-6 py-2 rounded-md font-medium"
+            >
+              Sign Out
+            </button>
+          </>
+        ) : (
+          <button 
+            onClick={onLogin}
+            className="btn-luxury px-6 py-2 rounded-md font-medium"
+          >
+            Member Access
+          </button>
+        )}
+      </div>
+    </div>
+  </nav>
+);
+
+const BookingForm = () => {
+  const [formData, setFormData] = useState({
+    contactName: '',
+    email: '',
+    pickupLocation: '',
+    dropoffLocation: '',
+    date: '',
+    specialRequirements: ''
+  });
+
+  return (
+    <div className="card-luxury p-8 rounded-lg animate-fadeIn">
+      <div className="flex items-center space-x-4 mb-8">
+        <Calendar className="h-8 w-8 text-gold" />
+        <h2 className="text-3xl font-playfair font-bold">Premium Transport Booking</h2>
+      </div>
+      <form className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-charcoal">Contact Name</label>
+            <input
+              type="text"
+              className="input-luxury w-full px-4 py-3 rounded-md"
+              placeholder="Your full name"
+              value={formData.contactName}
+              onChange={(e) => setFormData({...formData, contactName: e.target.value})}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-charcoal">Email Address</label>
+            <input
+              type="email"
+              className="input-luxury w-full px-4 py-3 rounded-md"
+              placeholder="your@email.com"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-charcoal">
+              <div className="flex items-center space-x-2">
+                <MapPin className="h-4 w-4 text-gold" />
+                <span>Collection Location</span>
+              </div>
+            </label>
+            <input
+              type="text"
+              className="input-luxury w-full px-4 py-3 rounded-md"
+              placeholder="Enter collection address"
+              value={formData.pickupLocation}
+              onChange={(e) => setFormData({...formData, pickupLocation: e.target.value})}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-charcoal">Special Requirements</label>
+            <textarea
+              className="input-luxury w-full px-4 py-3 rounded-md"
+              placeholder="Any specific requirements for your horse"
+              rows="3"
+              value={formData.specialRequirements}
+              onChange={(e) => setFormData({...formData, specialRequirements: e.target.value})}
+            />
+          </div>
+        </div>
+        <div className="flex justify-end pt-6">
+          <button className="btn-luxury px-8 py-3 rounded-md font-medium flex items-center space-x-2">
+            <span>Request Transport</span>
+            <Truck className="h-5 w-5" />
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const MembershipCard = ({ plan, onSelect, isPopular }) => (
+  <div className={`card-luxury p-8 rounded-lg relative ${isPopular ? 'border-2 border-gold' : ''}`}>
+    {isPopular && (
+      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gold text-white px-4 py-1 rounded-full text-sm">
+        Most Popular
+      </div>
+    )}
+    <div className="space-y-6">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="text-2xl font-playfair font-bold">{plan.name}</h3>
+          <p className="text-gray-600 mt-2">{plan.description}</p>
+        </div>
+        <Crown className={`h-6 w-6 ${isPopular ? 'text-gold' : 'text-gray-400'}`} />
+      </div>
+      <div className="flex items-baseline space-x-2">
+        <span className="text-4xl font-playfair font-bold text-gold">${plan.price}</span>
+        <span className="text-gray-600">/month</span>
+      </div>
+      <ul className="space-y-4">
+        {plan.benefits.map((benefit, index) => (
+          <li key={index} className="flex items-start space-x-3">
+            <Shield className="h-5 w-5 text-gold flex-shrink-0 mt-0.5" />
+            <span className="text-gray-700">{benefit}</span>
+          </li>
+        ))}
+      </ul>
+      <button
+        onClick={() => onSelect(plan.type)}
+        className={`w-full btn-luxury py-3 rounded-md font-medium ${
+          isPopular ? 'shadow-lg' : ''
+        }`}
+      >
+        Select Plan
+      </button>
+    </div>
+  </div>
+);
+
+const Footer = () => (
+  <footer className="footer-luxury py-12">
+    <div className="container mx-auto px-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div>
+          <h3 className="text-xl font-playfair font-bold text-white mb-4">Two Mittens Farm</h3>
+          <p className="text-gray-400">Luxury horse transportation services</p>
+        </div>
+        <div>
+          <h4 className="text-lg font-playfair font-bold text-white mb-4">Contact</h4>
+          <p className="text-gray-400">Email: contact@twomittensfarm.com</p>
+          <p className="text-gray-400">Phone: (555) 123-4567</p>
+        </div>
+        <div>
+          <h4 className="text-lg font-playfair font-bold text-white mb-4">Follow Us</h4>
+          <div className="flex space-x-4">
+            {/* Add social media icons here */}
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+        <p className="text-gray-400">&copy; 2025 Two Mittens Farm. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+);
+
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState('');
+  const [activeTab, setActiveTab] = useState('booking');
+
+  const membershipPlans = [
+    {
+      type: 'premium',
+      name: 'Premium Access',
+      description: 'Elevated horse transport experience',
+      price: 299,
+      benefits: [
+        'Priority scheduling',
+        'Luxury transport vehicles',
+        'Dedicated concierge',
+        'Regional coverage'
+      ]
+    },
+    {
+      type: 'elite',
+      name: 'Elite Membership',
+      description: 'Ultimate in equine transportation',
+      price: 599,
+      benefits: [
+        'Unlimited priority transport',
+        'Premium vehicle fleet access',
+        '24/7 dedicated support',
+        'Nationwide coverage'
+      ]
+    },
+    {
+      type: 'platinum',
+      name: 'Platinum Circle',
+      description: 'Bespoke transportation solutions',
+      price: 999,
+      benefits: [
+        'Custom transport planning',
+        'Private fleet access',
+        'Personal transport coordinator',
+        'International services available'
+      ]
+    }
+  ];
+
+  return (
+    <div className="min-h-screen flex flex-col bg-cream">
+      <Navigation
+        isAuthenticated={isAuthenticated}
+        username={username}
+        onLogin={() => setIsAuthenticated(true)}
+        onLogout={() => setIsAuthenticated(false)}
+      />
+      
+      <main className="flex-grow container mx-auto px-6 py-12">
+        <div className="space-y-12">
+          {activeTab === 'booking' && <BookingForm />}
+          
+          {activeTab === 'membership' && (
+            <div className="space-y-12">
+              <div className="text-center">
+                <h2 className="text-4xl font-playfair font-bold mb-4">Exclusive Membership Plans</h2>
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  Experience unparalleled service with our premium membership options
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {membershipPlans.map((plan, index) => (
+                  <MembershipCard
+                    key={plan.type}
+                    plan={plan}
+                    isPopular={index === 1}
+                    onSelect={(type) => console.log('Selected plan:', type)}
+                  />
+                ))}
+              </div>
             </div>
-        `
-    };
+          )}
+        </div>
+      </main>
 
-    // Membership Component
-    const MembershipComponent = {
-        template: `
-            <div class="space-y-8">
-                <div class="bg-white shadow-md rounded-lg p-8">
-                    <h2 class="text-2xl font-semibold mb-6">Horse Transportation Membership Plans</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div v-for="plan in $parent.membershipPlans" :key="plan.type" class="p-6 border rounded-lg shadow-lg">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4">{{ plan.name }}</h3>
-                            <p class="text-sm text-gray-600 mb-4">{{ plan.description }}</p>
-                            <p class="text-3xl font-extrabold text-blue-600 mb-4">${{ plan.price }}/month</p>
-                            <ul class="list-disc list-inside space-y-2 mb-6">
-                                <li v-for="benefit in plan.benefits" :key="benefit">{{ benefit }}</li>
-                            </ul>
-                            <button @click="$parent.selectPlan(plan.type)" class="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600">
-                                Choose Plan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `
-    };
+      <Footer />
+    </div>
+  );
+};
 
-    // Feedback Component
-    const FeedbackComponent = {
-        template: `
-            <div class="space-y-8">
-                <div class="bg-white shadow-md rounded-lg p-8">
-                    <h2 class="text-2xl font-semibold mb-6">Leave Feedback</h2>
-                    <form @submit.prevent="$emit('submit-feedback')">
-                        <div class="grid grid-cols-1 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Title</label>
-                                <input type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Rating</label>
-                                <select required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                    <option disabled value="">Select rating</option>
-                                    <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
-                                </select>
-                            </div>
-                            <!-- Add other fields similarly -->
-                        </div>
-                        <div class="mt-6 flex justify-end">
-                            <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700">
-                                Submit Feedback
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        `
-    };
-
-    const routes = [
-        { path: '/', redirect: { name: 'booking' } },
-        { path: '/booking', name: 'booking', component: BookingComponent },
-        { path: '/membership', name: 'membership', component: MembershipComponent },
-        { path: '/feedback', name: 'feedback', component: FeedbackComponent }
-    ];
-
-    const router = new VueRouter({
-        mode: 'history',
-        routes
-    });
-
-    new Vue({
-        el: '#app',
-        router,
-        data: {
-            isAuthenticated: false,
-            username: '',
-            tabs: [
-                { id: 'booking', name: 'Book Transport' },
-                { id: 'membership', name: 'Membership' },
-                { id: 'feedback', name: 'Feedback' }
-            ],
-            membershipPlans: [
-                {
-                    type: 'basic',
-                    name: 'Basic Plan',
-                    description: 'Essential features for occasional users.',
-                    price: 99,
-                    benefits: [
-                        'Up to 2 transports per month',
-                        '24/7 customer support',
-                        'Access to local routes'
-                    ]
-                },
-                {
-                    type: 'premium',
-                    name: 'Premium Plan',
-                    description: 'Advanced features for frequent users.',
-                    price: 249,
-                    benefits: [
-                        'Up to 5 transports per month',
-                        'Priority booking',
-                        'Extended routes (up to 100 miles)'
-                    ]
-                },
-                {
-                    type: 'unlimited',
-                    name: 'Unlimited Plan',
-                    description: 'Unlimited features for power users.',
-                    price: 499,
-                    benefits: [
-                        'Unlimited transports',
-                        'Nationwide routes',
-                        'Premium 24/7 support'
-                    ]
-                }
-            ]
-        },
-        methods: {
-            login() {
-                this.isAuthenticated = true;
-                this.username = 'JohnDoe';
-            },
-            logout() {
-                this.isAuthenticated = false;
-                this.username = '';
-            }
-        }
-    });
-});
+export default App;
