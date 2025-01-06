@@ -1,40 +1,112 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Booking Component
+    const BookingComponent = {
+        template: `
+            <div class="space-y-8">
+                <div class="bg-white shadow-md rounded-lg p-8">
+                    <h2 class="text-2xl font-semibold mb-6">Book a Horse Transport</h2>
+                    <form @submit.prevent="$emit('submit-booking')">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Contact Name</label>
+                                <input type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                            <!-- Add other fields similarly -->
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700">
+                                Submit Booking
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `
+    };
+
+    // Membership Component
+    const MembershipComponent = {
+        template: `
+            <div class="space-y-8">
+                <div class="bg-white shadow-md rounded-lg p-8">
+                    <h2 class="text-2xl font-semibold mb-6">Horse Transportation Membership Plans</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div v-for="plan in $parent.membershipPlans" :key="plan.type" class="p-6 border rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">{{ plan.name }}</h3>
+                            <p class="text-sm text-gray-600 mb-4">{{ plan.description }}</p>
+                            <p class="text-3xl font-extrabold text-blue-600 mb-4">${{ plan.price }}/month</p>
+                            <ul class="list-disc list-inside space-y-2 mb-6">
+                                <li v-for="benefit in plan.benefits" :key="benefit">{{ benefit }}</li>
+                            </ul>
+                            <button @click="$parent.selectPlan(plan.type)" class="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600">
+                                Choose Plan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `
+    };
+
+    // Feedback Component
+    const FeedbackComponent = {
+        template: `
+            <div class="space-y-8">
+                <div class="bg-white shadow-md rounded-lg p-8">
+                    <h2 class="text-2xl font-semibold mb-6">Leave Feedback</h2>
+                    <form @submit.prevent="$emit('submit-feedback')">
+                        <div class="grid grid-cols-1 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Title</label>
+                                <input type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Rating</label>
+                                <select required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option disabled value="">Select rating</option>
+                                    <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+                                </select>
+                            </div>
+                            <!-- Add other fields similarly -->
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700">
+                                Submit Feedback
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `
+    };
+
+    const routes = [
+        { path: '/', redirect: { name: 'booking' } },
+        { path: '/booking', name: 'booking', component: BookingComponent },
+        { path: '/membership', name: 'membership', component: MembershipComponent },
+        { path: '/feedback', name: 'feedback', component: FeedbackComponent }
+    ];
+
+    const router = new VueRouter({
+        mode: 'history',
+        routes
+    });
+
     new Vue({
         el: '#app',
+        router,
         data: {
             isAuthenticated: false,
             username: '',
-            currentTab: 'booking',
             tabs: [
                 { id: 'booking', name: 'Book Transport' },
                 { id: 'membership', name: 'Membership' },
                 { id: 'feedback', name: 'Feedback' }
             ],
-            showBookingConfirmation: false,
-            showFeedbackConfirmation: false,
-            showMembershipModal: false,
-            bookingConfirmation: {
-                id: null,
-                status: null
-            },
-            bookingForm: {
-                contact_name: '',
-                email: '',
-                phone: '',
-                date: '',
-                time: '',
-                pickup_location: '',
-                dropoff_location: '',
-                horse_details: '',
-                special_requirements: ''
-            },
-            availableSlots: [],
-            minDate: new Date().toISOString().split('T')[0],
-            feedbackForm: {
-                title: '',
-                rating: 0,
-                content: ''
-            },
             membershipPlans: [
                 {
                     type: 'basic',
@@ -69,153 +141,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Premium 24/7 support'
                     ]
                 }
-            ],
-            selectedPlan: null,
-            userBookings: [] // Mock data for user bookings
-        },
-        computed: {
-            isBookingFormValid() {
-                return this.bookingForm.contact_name &&
-                    this.bookingForm.email &&
-                    this.bookingForm.phone &&
-                    this.bookingForm.date &&
-                    this.bookingForm.time &&
-                    this.bookingForm.pickup_location &&
-                    this.bookingForm.dropoff_location &&
-                    this.bookingForm.horse_details;
-            },
-            isFeedbackFormValid() {
-                return this.feedbackForm.title &&
-                    this.feedbackForm.rating > 0 &&
-                    this.feedbackForm.content;
-            },
-            selectedPlanDetails() {
-                return this.membershipPlans.find(plan => plan.type === this.selectedPlan) || {};
-            }
+            ]
         },
         methods: {
             login() {
-                // Simulate a login process
                 this.isAuthenticated = true;
                 this.username = 'JohnDoe';
-                this.userBookings = [
-                    {
-                        id: 1,
-                        start_datetime: '2025-01-15T10:00:00',
-                        horse: { name: 'Thunder' },
-                        status: 'Confirmed'
-                    },
-                    {
-                        id: 2,
-                        start_datetime: '2025-02-20T14:30:00',
-                        horse: { name: 'Lightning' },
-                        status: 'Confirmed'
-                    }
-                ];
             },
             logout() {
                 this.isAuthenticated = false;
                 this.username = '';
-                this.userBookings = [];
-            },
-            formatDate(datetime) {
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                return new Date(datetime).toLocaleDateString(undefined, options);
-            },
-            formatTime(datetime) {
-                const options = { hour: 'numeric', minute: 'numeric', hour12: true };
-                return new Date(datetime).toLocaleTimeString(undefined, options);
-            },
-            async fetchAvailableSlots() {
-                if (!this.bookingForm.date) return;
-                try {
-                    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-                    this.availableSlots = [
-                        '08:00 AM',
-                        '10:00 AM',
-                        '12:00 PM',
-                        '02:00 PM',
-                        '04:00 PM'
-                    ];
-                } catch (error) {
-                    console.error('Error fetching available slots:', error);
-                }
-            },
-            async submitBooking() {
-                try {
-                    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-                    const response = {
-                        data: {
-                            status: 'success',
-                            booking_id: Math.floor(Math.random() * 10000)
-                        }
-                    };
-                    if (response.data.status === 'success') {
-                        this.bookingConfirmation.id = response.data.booking_id;
-                        this.showBookingConfirmation = true;
-                        this.bookingForm = {
-                            contact_name: '',
-                            email: '',
-                            phone: '',
-                            date: '',
-                            time: '',
-                            pickup_location: '',
-                            dropoff_location: '',
-                            horse_details: '',
-                            special_requirements: ''
-                        };
-                        if (this.isAuthenticated) {
-                            this.userBookings.push({
-                                id: response.data.booking_id,
-                                start_datetime: `${this.bookingForm.date}T${this.bookingForm.time}:00`,
-                                horse: { name: this.bookingForm.horse_details },
-                                status: 'Confirmed'
-                            });
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error submitting booking:', error);
-                }
-            },
-            closeBookingConfirmation() {
-                this.showBookingConfirmation = false;
-            },
-            async submitFeedback() {
-                try {
-                    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-                    const response = { data: { status: 'success' } };
-                    if (response.data.status === 'success') {
-                        this.showFeedbackConfirmation = true;
-                        this.feedbackForm = {
-                            title: '',
-                            rating: 0,
-                            content: ''
-                        };
-                    }
-                } catch (error) {
-                    console.error('Error submitting feedback:', error);
-                }
-            },
-            selectPlan(planType) {
-                this.selectedPlan = planType;
-                this.showMembershipModal = true;
-            },
-            async processMembership() {
-                try {
-                    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-                    const response = { data: { status: 'success' } };
-                    if (response.data.status === 'success') {
-                        this.showMembershipModal = false;
-                        alert('Your membership has been successfully activated! Check your email for confirmation.');
-                    }
-                } catch (error) {
-                    alert('Error processing membership. Please try again.');
-                    console.error('Error:', error);
-                }
             }
-        },
-        watch: {
-            'bookingForm.date': 'fetchAvailableSlots'
         }
     });
 });

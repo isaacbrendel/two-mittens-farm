@@ -7,259 +7,7 @@
     
     <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- Note: @vuepic/vue-datepicker is for Vue 3. Since you're using Vue 2, consider using an alternative datepicker or remove it if not needed -->
-    <script src="https://cdn.jsdelivr.net/npm/vue-datepicker@1.6.2/dist/vue-datepicker.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body class="bg-gray-50">
-    <div id="app" v-cloak class="min-h-screen">
-        <!-- Navigation -->
-        <nav class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex">
-                        <div class="flex-shrink-0 flex items-center">
-                            <h1 class="text-2xl font-bold text-gray-900">Two Mittens Farm</h1>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <span v-if="isAuthenticated" class="text-gray-700 mr-4">Welcome, {{ username }}</span>
-                        <button v-if="isAuthenticated" @click="logout" class="text-gray-600 hover:text-gray-900 mr-4">Logout</button>
-                        <button v-else @click="login" class="text-gray-600 hover:text-gray-900">Login</button>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Main Content -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Tabs -->
-            <div class="border-b border-gray-200 mb-8">
-                <nav class="-mb-px flex space-x-8">
-                    <button 
-                        v-for="tab in tabs" 
-                        :key="tab.id"
-                        @click="currentTab = tab.id"
-                        :class="[
-                            currentTab === tab.id
-                                ? 'border-blue-500 text-blue-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
-                        ]"
-                    >
-                        {{ tab.name }}
-                    </button>
-                </nav>
-            </div>
-
-            <!-- Tab Content -->
-            <transition name="tab" mode="out-in">
-                <!-- Booking Tab -->
-                <div v-if="currentTab === 'booking'" key="booking" class="space-y-8">
-                    <!-- Booking Form -->
-                    <div class="bg-white shadow sm:rounded-lg p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Book a Transport</h3>
-                        <form @submit.prevent="submitBooking">
-                            <div class="grid grid-cols-1 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Contact Name</label>
-                                    <input v-model="bookingForm.contact_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Email</label>
-                                    <input v-model="bookingForm.email" type="email" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Phone</label>
-                                    <input v-model="bookingForm.phone" type="tel" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Date</label>
-                                    <input v-model="bookingForm.date" type="date" :min="minDate" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Time</label>
-                                    <input v-model="bookingForm.time" type="time" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Pickup Location</label>
-                                    <input v-model="bookingForm.pickup_location" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Dropoff Location</label>
-                                    <input v-model="bookingForm.dropoff_location" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Horse Details</label>
-                                    <textarea v-model="bookingForm.horse_details" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Special Requirements</label>
-                                    <textarea v-model="bookingForm.special_requirements" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
-                                </div>
-                            </div>
-                            <div class="mt-6">
-                                <button :disabled="!isBookingFormValid" type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
-                                    Submit Booking
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Upcoming Bookings -->
-                    <div v-if="isAuthenticated" class="bg-white shadow sm:rounded-lg p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Your Upcoming Bookings</h3>
-                        <div v-if="userBookings.length">
-                            <div class="space-y-4">
-                                <div v-for="booking in userBookings" :key="booking.id" class="border-l-4 border-blue-400 bg-blue-50 p-4">
-                                    <div class="flex justify-between">
-                                        <div>
-                                            <p class="text-sm font-medium text-blue-600">
-                                                {{ formatDate(booking.start_datetime) }} at {{ formatTime(booking.start_datetime) }}
-                                            </p>
-                                            <p class="text-sm text-gray-500">{{ booking.horse.name }}</p>
-                                        </div>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Confirmed
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else>
-                            <p class="text-gray-500">No upcoming bookings</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Membership Tab -->
-                <div v-if="currentTab === 'membership'" key="membership" class="space-y-8">
-                    <div class="bg-white shadow sm:rounded-lg p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Membership Plans</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div v-for="plan in membershipPlans" :key="plan.type" class="border rounded-lg p-4">
-                                <h4 class="text-xl font-semibold">{{ plan.name }}</h4>
-                                <p class="mt-2">{{ plan.description }}</p>
-                                <p class="mt-4 text-2xl font-bold">${{ plan.price }}/{{ plan.period }}</p>
-                                <ul class="mt-4 list-disc list-inside">
-                                    <li v-for="benefit in plan.benefits" :key="benefit">{{ benefit }}</li>
-                                </ul>
-                                <button @click="selectPlan(plan.type)" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                    Choose Plan
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Feedback Tab -->
-                <div v-if="currentTab === 'feedback'" key="feedback" class="space-y-8">
-                    <div class="bg-white shadow sm:rounded-lg p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Feedback</h3>
-                        <form @submit.prevent="submitFeedback">
-                            <div class="grid grid-cols-1 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Title</label>
-                                    <input v-model="feedbackForm.title" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Rating</label>
-                                    <select v-model="feedbackForm.rating" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                        <option disabled value="">Select rating</option>
-                                        <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Content</label>
-                                    <textarea v-model="feedbackForm.content" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
-                                </div>
-                            </div>
-                            <div class="mt-6">
-                                <button :disabled="!isFeedbackFormValid" type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
-                                    Submit Feedback
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </transition>
-        </div>
-
-        <!-- Modals -->
-        <!-- Booking Confirmation Modal -->
-        <div v-if="showBookingConfirmation" class="fixed inset-0 flex items-center justify-center z-50">
-            <div class="modal-overlay absolute inset-0"></div>
-            <div class="modal-content bg-white rounded-lg p-6 z-10">
-                <h2 class="text-xl font-semibold mb-4">Booking Confirmed</h2>
-                <p>Your booking (ID: {{ bookingConfirmation.id }}) has been successfully submitted.</p>
-                <button @click="closeBookingConfirmation" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Close
-                </button>
-            </div>
-        </div>
-
-        <!-- Feedback Confirmation Modal -->
-        <div v-if="showFeedbackConfirmation" class="fixed inset-0 flex items-center justify-center z-50">
-            <div class="modal-overlay absolute inset-0"></div>
-            <div class="modal-content bg-white rounded-lg p-6 z-10">
-                <h2 class="text-xl font-semibold mb-4">Feedback Submitted</h2>
-                <p>Thank you for your feedback!</p>
-                <button @click="showFeedbackConfirmation = false" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Close
-                </button>
-            </div>
-        </div>
-
-        <!-- Membership Modal -->
-        <div v-if="showMembershipModal" class="fixed inset-0 flex items-center justify-center z-50">
-            <div class="modal-overlay absolute inset-0"></div>
-            <div class="modal-content bg-white rounded-lg p-6 z-10">
-                <h2 class="text-xl font-semibold mb-4">Activate Membership</h2>
-                <form @submit.prevent="processMembership">
-                    <div class="grid grid-cols-1 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                            <input v-model="membershipForm.fullName" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input v-model="membershipForm.email" type="email" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Phone</label>
-                            <input v-model="membershipForm.phone" type="tel" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"/>
-                        </div>
-                    </div>
-                    <div class="mt-6">
-                        <button :disabled="!isMembershipFormValid" type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
-                            Activate Membership
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Custom JavaScript -->
-    <script src="js/app.js"></script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Two Mittens Farm - Horse Transportation</title>
-    
-    <!-- External Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-router@3.5.3/dist/vue-router.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -269,7 +17,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-gray-100 font-inter">
+<body class="bg-gray-50 font-inter">
     <div id="app" v-cloak class="min-h-screen flex flex-col">
         <!-- Navigation -->
         <nav class="bg-white shadow-lg py-4">
@@ -283,129 +31,28 @@
             </div>
         </nav>
 
-        <!-- Main Content -->
+        <!-- Tabs Navigation -->
+        <div class="container mx-auto px-6 md:px-12 py-6 border-b border-gray-200">
+            <nav class="flex space-x-8 justify-center">
+                <router-link 
+                    v-for="tab in tabs" 
+                    :key="tab.id"
+                    :to="{ name: tab.id }"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                    :class="[
+                        $route.name === tab.id
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ]"
+                >
+                    {{ tab.name }}
+                </router-link>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
         <main class="flex-grow container mx-auto px-6 md:px-12 py-12">
-            <!-- Tabs -->
-            <div class="flex justify-center mb-8">
-                <nav class="flex space-x-6">
-                    <button 
-                        v-for="tab in tabs" 
-                        :key="tab.id"
-                        @click="currentTab = tab.id"
-                        :class="[
-                            currentTab === tab.id
-                                ? 'border-b-4 border-blue-500 text-blue-600'
-                                : 'text-gray-500 hover:text-gray-700',
-                            'text-lg font-medium'
-                        ]"
-                    >
-                        {{ tab.name }}
-                    </button>
-                </nav>
-            </div>
-
-            <!-- Tab Content -->
-            <transition name="tab" mode="out-in">
-                <!-- Booking Tab -->
-                <div v-if="currentTab === 'booking'" key="booking" class="space-y-8">
-                    <!-- Booking Form -->
-                    <div class="bg-white shadow-md rounded-lg p-8">
-                        <h2 class="text-2xl font-semibold mb-6">Book a Horse Transport</h2>
-                        <form @submit.prevent="submitBooking">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Contact Name</label>
-                                    <input v-model="bookingForm.contact_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Email</label>
-                                    <input v-model="bookingForm.email" type="email" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Phone</label>
-                                    <input v-model="bookingForm.phone" type="tel" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Date</label>
-                                    <input v-model="bookingForm.date" type="date" :min="minDate" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Time</label>
-                                    <input v-model="bookingForm.time" type="time" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Pickup Location</label>
-                                    <input v-model="bookingForm.pickup_location" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Dropoff Location</label>
-                                    <input v-model="bookingForm.dropoff_location" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Horse Details</label>
-                                    <textarea v-model="bookingForm.horse_details" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                </div>
-                            </div>
-                            <div class="mt-6 flex justify-end">
-                                <button :disabled="!isBookingFormValid" type="submit" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50">
-                                    Submit Booking
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Membership Tab -->
-                <div v-if="currentTab === 'membership'" key="membership" class="space-y-8">
-                    <div class="bg-white shadow-md rounded-lg p-8">
-                        <h2 class="text-2xl font-semibold mb-6">Horse Transportation Membership Plans</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div v-for="plan in membershipPlans" :key="plan.type" class="p-6 border rounded-lg shadow-lg">
-                                <h3 class="text-xl font-bold text-gray-800 mb-4">{{ plan.name }}</h3>
-                                <p class="text-sm text-gray-600 mb-4">{{ plan.description }}</p>
-                                <p class="text-3xl font-extrabold text-blue-600 mb-4">${{ plan.price }}/month</p>
-                                <ul class="list-disc list-inside space-y-2 mb-6">
-                                    <li v-for="benefit in plan.benefits" :key="benefit">{{ benefit }}</li>
-                                </ul>
-                                <button @click="selectPlan(plan.type)" class="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600">
-                                    Choose Plan
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Feedback Tab -->
-                <div v-if="currentTab === 'feedback'" key="feedback" class="space-y-8">
-                    <div class="bg-white shadow-md rounded-lg p-8">
-                        <h2 class="text-2xl font-semibold mb-6">Leave Feedback</h2>
-                        <form @submit.prevent="submitFeedback">
-                            <div class="grid grid-cols-1 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Title</label>
-                                    <input v-model="feedbackForm.title" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Rating</label>
-                                    <select v-model="feedbackForm.rating" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                        <option disabled value="">Select rating</option>
-                                        <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Content</label>
-                                    <textarea v-model="feedbackForm.content" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                </div>
-                            </div>
-                            <div class="mt-6 flex justify-end">
-                                <button :disabled="!isFeedbackFormValid" type="submit" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:opacity-50">
-                                    Submit Feedback
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </transition>
+            <router-view></router-view>
         </main>
 
         <!-- Footer -->
