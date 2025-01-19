@@ -16,16 +16,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
-      - name: Verify JavaScript syntax
-        run: |
-          echo "Checking JavaScript files..."
-          for file in $(find . -name "*.js"); do
-            echo "Checking $file"
-            node --check "$file" || exit 1
-          done
 
-      - name: Verify HTML
+      - name: Install html-validator
+        run: npm install -g html-validator-cli
+      
+      - name: Validate HTML
         run: |
           echo "Checking HTML files..."
           for file in $(find . -name "*.html"); do
@@ -34,20 +29,30 @@ jobs:
               exit 1
             fi
           done
-          
-      - name: Validate CSS files exist
-        run: |
-          if [ ! -f "css/styles.css" ]; then
-            echo "Error: css/styles.css not found"
-            exit 1
-          fi
       
-      - name: Verify required components
+      - name: Check for required files
         run: |
-          required_components=("BookingComponent.js" "FeedbackComponent.js" "LoginModal.js" "MembershipComponent.js")
-          for component in "${required_components[@]}"; do
-            if [ ! -f "js/components/$component" ]; then
-              echo "Error: Component $component not found"
+          required_files=(
+            "index.html"
+            "css/styles.css"
+            "js/app.js"
+            "js/components/BookingComponent.js"
+            "js/components/FeedbackComponent.js"
+            "js/components/LoginModal.js"
+            "js/components/MembershipComponent.js"
+          )
+          
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Error: Required file $file is missing"
               exit 1
             fi
+          done
+      
+      - name: Validate JavaScript files
+        run: |
+          echo "Checking JavaScript files..."
+          for file in $(find . -name "*.js"); do
+            echo "Checking $file"
+            node --check "$file" || exit 1
           done
