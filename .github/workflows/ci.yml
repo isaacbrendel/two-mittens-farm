@@ -7,12 +7,47 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  validate:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Verify JavaScript syntax
+        run: |
+          echo "Checking JavaScript files..."
+          for file in $(find . -name "*.js"); do
+            echo "Checking $file"
+            node --check "$file" || exit 1
+          done
 
-      - name: Minimal Validation
-        run: echo "No formal build/test steps yet. Everything looks good!"
+      - name: Verify HTML
+        run: |
+          echo "Checking HTML files..."
+          for file in $(find . -name "*.html"); do
+            if ! grep -q "<!DOCTYPE html>" "$file"; then
+              echo "Error: No DOCTYPE found in $file"
+              exit 1
+            fi
+          done
+          
+      - name: Validate CSS files exist
+        run: |
+          if [ ! -f "css/styles.css" ]; then
+            echo "Error: css/styles.css not found"
+            exit 1
+          fi
+      
+      - name: Verify required components
+        run: |
+          required_components=("BookingComponent.js" "FeedbackComponent.js" "LoginModal.js" "MembershipComponent.js")
+          for component in "${required_components[@]}"; do
+            if [ ! -f "js/components/$component" ]; then
+              echo "Error: Component $component not found"
+              exit 1
+            fi
+          done
