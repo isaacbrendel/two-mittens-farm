@@ -1,10 +1,10 @@
-# Two Mittens Farm
+# 2MittensFarm
 
 Professional horse transportation and farm fresh eggs.
 
 ## About
 
-Two Mittens Farm, LLC provides:
+2MittensFarm, LLC provides:
 - **Horse Transportation**: Safe and reliable equine transport services
 - **Fresh Farm Eggs**: Free-range chicken eggs available by the dozen
 
@@ -23,9 +23,9 @@ No build process required. Just open `index.html` in a browser.
 
 ## Contact
 
-- Email: contact@twomittensfarm.com
+- Email: contact@2mittensfarm.com
 - Phone: (555) 123-4567
 
 ## License
 
-© 2025 Two Mittens Farm, LLC. All rights reserved.
+© 2025 2MittensFarm, LLC. All rights reserved.
