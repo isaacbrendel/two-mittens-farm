@@ -1,3 +1,4 @@
+# .github/workflows/ci.yml
 name: CI
 
 on:
@@ -10,43 +11,147 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
       - name: Check for required files
         run: |
+          echo "Checking for required files..."
           required_files=(
             "index.html"
             "style.css"
             "script.js"
-            "README.md"
+            "README.MD"  # Changed to match your uppercase .MD extension
           )
           
+          missing_files=()
           for file in "${required_files[@]}"; do
             if [ ! -f "$file" ]; then
-              echo "Error: Required file $file is missing"
-              exit 1
+              echo "❌ Missing: $file"
+              missing_files+=("$file")
+            else
+              echo "✅ Found: $file"
             fi
           done
           
-      - name: Validate HTML
+          if [ ${#missing_files[@]} -ne 0 ]; then
+            echo ""
+            echo "Error: ${#missing_files[@]} required file(s) missing"
+            exit 1
+          fi
+          
+      - name: Validate HTML structure
         run: |
-          echo "Checking HTML files..."
-          for file in $(find . -name "*.html"); do
-            if ! grep -q "<!DOCTYPE html>" "$file"; then
-              echo "Error: No DOCTYPE found in $file"
-              exit 1
+          echo "Validating HTML files..."
+          html_files=$(find . -name "*.html" -not -path "./.github/*" -not -path "./node_modules/*")
+          
+          if [ -z "$html_files" ]; then
+            echo "❌ No HTML files found"
+            exit 1
+          fi
+          
+          errors=0
+          for file in $html_files; do
+            echo "Checking: $file"
+            
+            # Check for DOCTYPE
+            if ! grep -qi "<!DOCTYPE html>" "$file"; then
+              echo "  ❌ Missing DOCTYPE declaration"
+              ((errors++))
+            else
+              echo "  ✅ DOCTYPE found"
+            fi
+            
+            # Check for basic HTML structure
+            if ! grep -qi "<html" "$file"; then
+              echo "  ❌ Missing <html> tag"
+              ((errors++))
+            fi
+            
+            if ! grep -qi "<head>" "$file"; then
+              echo "  ❌ Missing <head> tag"
+              ((errors++))
+            fi
+            
+            if ! grep -qi "<body>" "$file"; then
+              echo "  ❌ Missing <body> tag"
+              ((errors++))
             fi
           done
+          
+          if [ $errors -ne 0 ]; then
+            echo ""
+            echo "❌ HTML validation failed with $errors error(s)"
+            exit 1
+          else
+            echo ""
+            echo "✅ All HTML files are valid"
+          fi
           
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           
-      - name: Validate JavaScript
+      - name: Validate JavaScript syntax
         run: |
-          echo "Checking JavaScript files..."
-          for file in $(find . -name "*.js" -not -path "./node_modules/*" -not -path "./.github/*"); do
-            echo "Checking $file"
-            node --check "$file" || exit 1
+          echo "Validating JavaScript files..."
+          js_files=$(find . -name "*.js" -not -path "./node_modules/*" -not -path "./.github/*")
+          
+          if [ -z "$js_files" ]; then
+            echo "⚠️  No JavaScript files found to validate"
+            exit 0
+          fi
+          
+          errors=0
+          for file in $js_files; do
+            echo "Checking: $file"
+            if node --check "$file" 2>/dev/null; then
+              echo "  ✅ Valid JavaScript syntax"
+            else
+              echo "  ❌ Syntax error in $file:"
+              node --check "$file" 2>&1 | sed 's/^/    /'
+              ((errors++))
+            fi
           done
+          
+          if [ $errors -ne 0 ]; then
+            echo ""
+            echo "❌ JavaScript validation failed with $errors error(s)"
+            exit 1
+          else
+            echo ""
+            echo "✅ All JavaScript files are valid"
+          fi
+          
+      - name: Check file sizes
+        run: |
+          echo "Checking file sizes..."
+          large_files=()
+          
+          while IFS= read -r file; do
+            size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+            size_mb=$((size / 1048576))
+            
+            if [ $size_mb -gt 5 ]; then
+              large_files+=("$file (${size_mb}MB)")
+              echo "⚠️  Large file: $file (${size_mb}MB)"
+            fi
+          done < <(find . -type f -not -path "./.git/*" -not -path "./node_modules/*")
+          
+          if [ ${#large_files[@]} -ne 0 ]; then
+            echo ""
+            echo "⚠️  Warning: ${#large_files[@]} file(s) exceed 5MB"
+          fi
+          
+      - name: Summary
+        if: always()
+        run: |
+          echo ""
+          echo "========================================="
+          echo "CI Validation Summary for 2MittensFarm"
+          echo "========================================="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "========================================="
